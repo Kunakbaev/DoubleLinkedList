@@ -20,6 +20,13 @@ int main() {
     IF_MAIN_ERR_RETURN(constructLinkedList(&list));
 
     IF_MAIN_ERR_RETURN(dumpLinkedList(&list));
+    IF_MAIN_ERR_RETURN(insertAfterPosition(&list, 0, 10));
+    IF_MAIN_ERR_RETURN(insertAfterPosition(&list, 1, 20));
+    IF_MAIN_ERR_RETURN(insertAfterPosition(&list, 0, 30));
+    IF_MAIN_ERR_RETURN(insertAfterPosition(&list, 3, 40));
+    IF_MAIN_ERR_RETURN(insertAfterPosition(&list, 2, 50));
+    IF_MAIN_ERR_RETURN(insertAfterPosition(&list, 0, 60));
+    IF_MAIN_ERR_RETURN(dumpLinkedList(&list));
 
     IF_MAIN_ERR_RETURN(destructLinkedList(&list));
 
