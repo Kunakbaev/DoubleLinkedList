@@ -22,6 +22,8 @@ struct LinkedList {
     int    freeNodesHead; // "pointer" to a head of free nodes list, if equal to -1, than there are no free nodes in list
 };
 
+LinkedListErrors deleteFromPosition(LinkedList* list,
+                                    size_t deletionPosition);
 LinkedListErrors insertAfterPosition(LinkedList* list,
                                      size_t insertPosition,
                                      node_datatype_t newValue);

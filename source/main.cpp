@@ -27,6 +27,8 @@ int main() {
     IF_MAIN_ERR_RETURN(insertAfterPosition(&list, 2, 50));
     IF_MAIN_ERR_RETURN(insertAfterPosition(&list, 0, 60));
     IF_MAIN_ERR_RETURN(dumpLinkedList(&list));
+    IF_MAIN_ERR_RETURN(deleteFromPosition(&list,  6));
+    IF_MAIN_ERR_RETURN(dumpLinkedList(&list));
 
     IF_MAIN_ERR_RETURN(destructLinkedList(&list));
 

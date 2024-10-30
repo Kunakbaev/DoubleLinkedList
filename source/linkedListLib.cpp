@@ -22,6 +22,9 @@ static LinkedListErrors makeLinkedListNodeFree(LinkedList* list, Node** node) {
     IF_ARG_NULL_RETURN(node);
     IF_ARG_NULL_RETURN(*node);
 
+    (*node)->data   =  0;
+    (*node)->next   = -1;
+    (*node)->prev   = -1;
     if (list->freeNodesHead != -1) // we don't need prev, cause it's a simple oneway list
         (*node)->next = list->freeNodesHead;
     list->freeNodesHead = (*node)->arrInd;
@@ -34,12 +37,8 @@ LinkedListErrors initFreeNodesList(LinkedList* list) {
 
     list->freeNodesHead = -1;
     for (size_t nodeInd = 0; nodeInd < MAX_LIST_SIZE; ++nodeInd) {
-        Node* node   = &list->nodes[nodeInd];
-        node->data   = 0;
+        Node* node = &list->nodes[nodeInd];
         node->arrInd = nodeInd;
-        node->next   = -1;
-        node->prev   = -1;
-
         IF_ERR_RETURN(makeLinkedListNodeFree(list, &node));
         // LOG_DEBUG_VARS(nodeInd, list->nodes[nodeInd].arrInd);
     }
@@ -221,7 +220,6 @@ LinkedListErrors insertAfterPosition(LinkedList* list,
         return LINKED_LIST_STATUS_OK;
     }
 
-    int prev = element->prev;
     if (element->next != -1)
         linkTwoNodes(newNode, &list->nodes[element->next]);
     else
@@ -233,45 +231,41 @@ LinkedListErrors insertAfterPosition(LinkedList* list,
 
 LinkedListErrors deleteFromPosition(LinkedList* list,
                                     size_t deletionPosition) {
-    LOG_INFO("insert after position");
+    LOG_INFO("deletion from position");
     IF_ARG_NULL_RETURN(list);
     IF_NOT_COND_RETURN(deletionPosition <= list->listSize,
                        LINKED_LIST_ERROR_INVALID_ARGUMENT); // TODO: add error
-
-    Node* newNode = NULL;
-    IF_ERR_RETURN(getLinkedListFreeNode(list, &newNode));
-    assert(newNode != NULL);
-    newNode->data = newValue;
-
-    LOG_DEBUG_VARS(newNode->arrInd, newNode->next, newNode->prev);
-
-    if (list->listSize == 0) {
-        ++list->listSize;
-        list->head = list->tail = newNode->arrInd;
-        LOG_DEBUG_VARS(list->freeNodesHead);
-        return LINKED_LIST_STATUS_OK;
-    }
+    IF_NOT_COND_RETURN(list->listSize != 0,
+                       LINKED_LIST_ERROR_DELETION_ON_EMPTY_LIST);
 
     Node* element = NULL;
-    IF_ERR_RETURN(getListNodeByIndex(list, insertPosition, &element));
+    IF_ERR_RETURN(getListNodeByIndex(list, deletionPosition, &element));
     LOG_DEBUG_VARS(element);
     if (element != NULL)
         LOG_DEBUG_VARS(element->data, element->arrInd, element->next);
 
-    ++list->listSize;
-    if (element == NULL) {
-        linkTwoNodes(newNode, &list->nodes[list->head]);
-        list->head = newNode->arrInd;
-        LOG_DEBUG_VARS(newNode->arrInd);
+    --list->listSize;
+    if (list->listSize == 0) {
+        IF_ERR_RETURN(makeLinkedListNodeFree(list, &element));
+        list->head = list->tail = -1;
         return LINKED_LIST_STATUS_OK;
     }
 
     int prev = element->prev;
-    if (element->next != -1)
-        linkTwoNodes(newNode, &list->nodes[element->next]);
-    else
-        list->tail = newNode->arrInd;
-    linkTwoNodes(element, newNode);
+    int next = element->next;
+    IF_ERR_RETURN(makeLinkedListNodeFree(list, &element));
+
+    if (next == -1) {
+        list->nodes[prev].next = -1;
+        list->tail = prev;
+        return LINKED_LIST_STATUS_OK;
+    }
+    if (prev == -1) {
+        list->nodes[next].prev = -1;
+        list->head = next;
+        return LINKED_LIST_STATUS_OK;
+    }
+    linkTwoNodes(&list->nodes[prev], &list->nodes[next]);
 
     return LINKED_LIST_STATUS_OK;
 }
