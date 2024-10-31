@@ -70,7 +70,7 @@ static LinkedListErrors getLinkedListFreeNode(LinkedList* list, Node** newNode) 
 
 static bool isListNodeFree(const Node* node) {
     assert(node != NULL);
-    return node->next != -1 && node->prev != -1;
+    return node->next == -1 || node->prev == -1;
 }
 
 static int getListHead(const LinkedList* list) {
@@ -118,7 +118,6 @@ LinkedListErrors constructLinkedList(LinkedList* list) {
     LOG_DEBUG_VARS(list->fictiveNode);
 
     RETURN_IF_INVALID(list);
-    //RETURN_IF_INVALID((const LinkedList*)list); // checks that we constructed a valid list
     return LINKED_LIST_STATUS_OK;
 }
 
@@ -127,9 +126,9 @@ LinkedListErrors checkIfLinkedListIsValid(const LinkedList* list) {
     IF_NOT_COND_RETURN(list->listSize < MAX_LIST_SIZE,
                         LINKED_LIST_LIST_IS_TOO_BIG);
 
+    IF_NOT_COND_RETURN(list->fictiveNode != -1,
+                       LINKED_LIST_ERRORS_BAD_LINK_BETWEEN_ELEMS);
     if (list->listSize == 0) {
-        IF_NOT_COND_RETURN(list->fictiveNode != -1,
-                           LINKED_LIST_ERRORS_BAD_LINK_BETWEEN_ELEMS);
         Node node = list->nodes[list->fictiveNode];
         IF_NOT_COND_RETURN(node.next == node.arrInd &&
                            node.prev == node.arrInd,
@@ -139,15 +138,6 @@ LinkedListErrors checkIfLinkedListIsValid(const LinkedList* list) {
 
     int head = getListHead(list);
     int tail = getListTail(list);
-    // if (list->listSize == 1) {
-    //     IF_NOT_COND_RETURN(head == tail && head != -1,
-    //                        LINKED_LIST_ERRORS_BAD_LINK_BETWEEN_ELEMS);
-    //     return LINKED_LIST_STATUS_OK;
-    // }
-
-    // IF_NOT_COND_RETURN(list->head != -1, LINKED_LIST_ERRORS_BAD_LINK_BETWEEN_ELEMS);
-    // IF_NOT_COND_RETURN(list->tail != -1, LINKED_LIST_ERRORS_BAD_LINK_BETWEEN_ELEMS);
-
     // LOG_DEBUG_VARS(head, tail, list->nodes[head].prev);
     // FIXME: add errors
     IF_NOT_COND_RETURN(head != -1,           LINKED_LIST_ERRORS_BAD_LINK_BETWEEN_ELEMS);
@@ -162,10 +152,12 @@ LinkedListErrors checkIfLinkedListIsValid(const LinkedList* list) {
     Node curNode = list->nodes[head];
     for (size_t nodeInd = 0; nodeInd + 1 < list->listSize; ++nodeInd) {
         int arrInd = curNode.arrInd;
-        int nxt    = curNode.next;
+        int next   = curNode.next;
         int prev   = curNode.prev;
 
-        IF_NOT_COND_RETURN(nxt != -1 && arrInd == list->nodes[nxt].prev,
+        IF_NOT_COND_RETURN(prev != -1 && next != -1,
+                           LINKED_LIST_ERRORS_BAD_LINK_BETWEEN_ELEMS);
+        IF_NOT_COND_RETURN(arrInd == list->nodes[next].prev,
                            LINKED_LIST_ERRORS_BAD_LINK_BETWEEN_ELEMS);
 
         IF_NOT_COND_RETURN(curNode.next < MAX_LIST_SIZE, LINKED_LIST_ERRORS_BAD_LINK_BETWEEN_ELEMS);
@@ -204,8 +196,9 @@ LinkedListErrors superSlow_getListNodeByIndex(const LinkedList* list, size_t sea
     IF_ARG_NULL_RETURN(result);
     IF_ARG_NULL_RETURN(list);
     IF_ARG_NULL_RETURN(result);
-    IF_NOT_COND_RETURN(searchPosition <= list->listSize, LINKED_LIST_ERROR_INVALID_ARGUMENT); // FIXME: add error
-    RETURN_IF_INVALID((LinkedList*)list);
+    IF_NOT_COND_RETURN(searchPosition <= list->listSize,
+                       LINKED_LIST_ERROR_INVALID_ARGUMENT); // FIXME: add error
+    RETURN_IF_INVALID(list);
 
     // TODO: add errors check
     int currentNode = list->fictiveNode;
@@ -237,6 +230,7 @@ LinkedListErrors insertAfterRealArrIndex(LinkedList* list,
     IF_ARG_NULL_RETURN(list);
     IF_NOT_COND_RETURN(arrayPosition < MAX_LIST_SIZE,
                        LINKED_LIST_ERROR_INVALID_ARGUMENT); // TODO: add error
+    RETURN_IF_INVALID(list);
 
     Node* newNode = NULL;
     IF_ERR_RETURN(getLinkedListFreeNode(list, &newNode));
@@ -246,14 +240,16 @@ LinkedListErrors insertAfterRealArrIndex(LinkedList* list,
 
     Node* element = &list->nodes[arrayPosition];
     LOG_DEBUG_VARS(element);
-    LOG_DEBUG_VARS(element->data, element->arrInd, element->next);
-
+    LOG_DEBUG_VARS(element->data, element->arrInd, element->next, element->prev);
+    IF_NOT_COND_RETURN(!isListNodeFree(element),
+                       LINKED_LIST_ERROR_INVALID_ARGUMENT);
 
     assert(element->next != -1);
     ++list->listSize;
     linkTwoNodes(newNode, &list->nodes[element->next]);
     linkTwoNodes(element, newNode);
 
+    RETURN_IF_INVALID(list);
     return LINKED_LIST_STATUS_OK;
 }
 
@@ -264,6 +260,7 @@ LinkedListErrors superSlow_insertAfterPosition(LinkedList* list,
     IF_ARG_NULL_RETURN(list);
     IF_NOT_COND_RETURN(insertPosition <= list->listSize,
                        LINKED_LIST_ERROR_INVALID_ARGUMENT); // TODO: add error
+    RETURN_IF_INVALID(list);
 
     Node* element = NULL;
     IF_ERR_RETURN(superSlow_getListNodeByIndex(list, insertPosition, &element));
@@ -274,6 +271,7 @@ LinkedListErrors superSlow_insertAfterPosition(LinkedList* list,
 
     IF_ERR_RETURN(insertAfterRealArrIndex(list, element->arrInd, newValue));
 
+    RETURN_IF_INVALID(list);
     return LINKED_LIST_STATUS_OK;
 }
 
@@ -289,11 +287,13 @@ LinkedListErrors deleteFromRealArrIndex(LinkedList* list,
                        LINKED_LIST_ERROR_INVALID_ARGUMENT); // TODO: add error
     IF_NOT_COND_RETURN(list->listSize != 0,
                        LINKED_LIST_ERROR_DELETION_ON_EMPTY_LIST);
+    RETURN_IF_INVALID(list);
 
     Node* element = &list->nodes[arrayPosition];
     LOG_DEBUG_VARS(element);
-    if (element != NULL)
-        LOG_DEBUG_VARS(element->data, element->arrInd, element->next);
+    LOG_DEBUG_VARS(element->data, element->arrInd, element->next);
+    IF_NOT_COND_RETURN(!isListNodeFree(element),
+                       LINKED_LIST_ERROR_INVALID_ARGUMENT);
 
     --list->listSize;
     int prev = element->prev;
@@ -303,6 +303,7 @@ LinkedListErrors deleteFromRealArrIndex(LinkedList* list,
     linkTwoNodes(&list->nodes[prev], &list->nodes[next]);
     IF_ERR_RETURN(makeLinkedListNodeFree(list, &element));
 
+    RETURN_IF_INVALID(list);
     return LINKED_LIST_STATUS_OK;
 }
 
@@ -314,6 +315,7 @@ LinkedListErrors superSlow_deleteFromPosition(LinkedList* list,
                        LINKED_LIST_ERROR_INVALID_ARGUMENT); // TODO: add error
     IF_NOT_COND_RETURN(list->listSize != 0,
                        LINKED_LIST_ERROR_DELETION_ON_EMPTY_LIST);
+    RETURN_IF_INVALID(list);
 
     Node* element = NULL;
     IF_ERR_RETURN(superSlow_getListNodeByIndex(list, deletionPosition, &element));
@@ -323,6 +325,7 @@ LinkedListErrors superSlow_deleteFromPosition(LinkedList* list,
 
     IF_ERR_RETURN(deleteFromRealArrIndex(list, element->arrInd));
 
+    RETURN_IF_INVALID(list);
     return LINKED_LIST_STATUS_OK;
 }
 
@@ -362,9 +365,10 @@ LinkedListErrors dumpLinkedList(const LinkedList* list) {
 
 LinkedListErrors destructLinkedList(LinkedList* list) {
     IF_ARG_NULL_RETURN(list);
-    RETURN_IF_INVALID(list);
 
     LOG_INFO("destructing list");
+    RETURN_IF_INVALID(list);
+
     FREE(list->nodes);
     list->listSize = 0;
     *list = {};
