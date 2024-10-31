@@ -17,16 +17,27 @@ struct Node {
 struct LinkedList {
     Node*          nodes;
     size_t      listSize;
-    int             head; // "pointer" to a head element, if equal to -1, than list is empty
-    int             tail; // "pointer" to a tail element, if equal to -1, than list is empty
+    int      fictiveNode; // created once and then not modified
     int    freeNodesHead; // "pointer" to a head of free nodes list, if equal to -1, than there are no free nodes in list
 };
 
-LinkedListErrors deleteFromPosition(LinkedList* list,
+
+//  -------------------------------------------      DELETION OF ELEMENTS        ----------------------------------
+
+LinkedListErrors deleteFromRealArrIndex(LinkedList* list,
+                                        size_t arrayPosition);
+LinkedListErrors superSlow_deleteFromPosition(LinkedList* list,
                                     size_t deletionPosition);
-LinkedListErrors insertAfterPosition(LinkedList* list,
+
+//  -------------------------------------------      INSERTION OF ELEMENTS        ----------------------------------
+
+LinkedListErrors insertAfterRealArrIndex(LinkedList* list,
+                                         size_t arrayPosition,
+                                         node_datatype_t newValue);
+LinkedListErrors superSlow_insertAfterPosition(LinkedList* list,
                                      size_t insertPosition,
                                      node_datatype_t newValue);
+
 LinkedListErrors checkIfLinkedListIsValid(const LinkedList* list);
 LinkedListErrors constructLinkedList(LinkedList* list);
 LinkedListErrors dumpLinkedListNode(const Node* node);
