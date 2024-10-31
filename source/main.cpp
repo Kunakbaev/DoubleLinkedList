@@ -2,6 +2,7 @@
 
 #include "logLib.hpp"
 #include "../include/linkedListLib.hpp"
+#include "../include/ultimateDumper.hpp"
 
 #define IF_MAIN_ERR_RETURN(error)                                   \
     do {                                                            \
@@ -19,22 +20,31 @@ int main() {
     setLoggingLevel(DEBUG);
     LOG_DEBUG("Hello world");
 
-    LinkedList list = {};
-    IF_MAIN_ERR_RETURN(constructLinkedList(&list));
+    Node node = {1010, 228, 9, 10};
+    Dumper dumper = {};
+    // add error check
+    dumperConstructor(&dumper, "logs", "png");
+    dumperDumpLinkedListNode(&dumper, &node);
+    node.arrInd = 10;
+    dumperDumpLinkedListNode(&dumper, &node);
+    dumperDestructor(&dumper);
 
-    LOG_DEBUG("---------------------");
-    IF_MAIN_ERR_RETURN(dumpLinkedList(&list));
-    LOG_DEBUG("---------------------");
-
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 10));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 1, 20));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 30));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 3, 40));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 2, 50));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 60));
-    IF_MAIN_ERR_RETURN(deleteAndDump(&list, 1));
-
-    IF_MAIN_ERR_RETURN(destructLinkedList(&list));
+//     LinkedList list = {};
+//     IF_MAIN_ERR_RETURN(constructLinkedList(&list));
+//
+//     LOG_DEBUG("---------------------");
+//     IF_MAIN_ERR_RETURN(dumpLinkedList(&list));
+//     LOG_DEBUG("---------------------");
+//
+//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 10));
+//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 1, 20));
+//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 30));
+//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 3, 40));
+//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 2, 50));
+//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 60));
+//     IF_MAIN_ERR_RETURN(deleteAndDump(&list, 1));
+//
+//     IF_MAIN_ERR_RETURN(destructLinkedList(&list));
 
     return 0;
 }
