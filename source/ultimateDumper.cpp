@@ -11,7 +11,7 @@
 #define IF_NOT_COND_RETURN(condition, error) \
     COMMON_IF_NOT_COND_RETURN(condition, error, getDumperErrorMessage)
 
-const size_t FILE_NAME_BUFFER_SIZE = 1 << 12;
+const size_t FILE_NAME_BUFFER_SIZE = 1 << 14;
 char* fileFullNameBuffer = NULL;
 char* fileNameBuffer     = NULL;
 
@@ -32,6 +32,7 @@ const char* getDumperErrorMessage(DumperErrors error) {
 }
 
 DumperErrors dumperConstructor(Dumper* dumper,
+                               size_t maxNumOfNodesToDraw,
                                const char* dirForLogsPath,
                                const char* outputFileFormat) {
     IF_ARG_NULL_RETURN(dumper);
@@ -39,9 +40,10 @@ DumperErrors dumperConstructor(Dumper* dumper,
     IF_ARG_NULL_RETURN(outputFileFormat);
 
     *dumper = {};
-    dumper->dirForLogsPath     = dirForLogsPath;
-    dumper->outputFileFormat   = outputFileFormat;
-    dumper->numberOfLogsBefore = 0;
+    dumper->maxNumOfNodesToDraw = maxNumOfNodesToDraw;
+    dumper->dirForLogsPath      = dirForLogsPath;
+    dumper->outputFileFormat    = outputFileFormat;
+    dumper->numberOfLogsBefore  = 0;
 
     fileFullNameBuffer = (char*)calloc(FILE_NAME_BUFFER_SIZE, sizeof(char));
     IF_NOT_COND_RETURN(fileFullNameBuffer != NULL,
@@ -95,9 +97,26 @@ DumperErrors dumperDumpLinkedListNode(Dumper* dumper, const Node* node) {
     IF_NOT_COND_RETURN(outputFile != NULL,
                        DUMPER_ERROR_COULD_OPEN_FILE);
 
+    const size_t BIG_NODE_BUFFER_SIZE = 1 << 10;
+    char* buffer = (char*)calloc(BIG_NODE_BUFFER_SIZE, sizeof(char));
+    IF_NOT_COND_RETURN(buffer != NULL,
+                       DUMPER_ERROR_MEMORY_ALLOCATION_ERROR);
+    LOG_DEBUG_VARS(buffer);
+
+    strcat(buffer, "digraph html {\n\
+        overlap=false\n\
+        splines=ortho\n\
+        bgcolor=\"black\"\n\
+        rankdir=LR\n\
+        pad=0.2\n\
+    ");
+
     memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
     IF_ERR_RETURN(addNodeDumpStructToBuffer(dumper, node, &fileNameBuffer));
-    fprintf(outputFile, fileNameBuffer);
+    strcat(buffer, fileNameBuffer);
+    LOG_DEBUG_VARS(buffer);
+    strcat(buffer, "}\n");
+    fprintf(outputFile, buffer);
     fclose(outputFile);
 
     memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
@@ -106,9 +125,97 @@ DumperErrors dumperDumpLinkedListNode(Dumper* dumper, const Node* node) {
     LOG_DEBUG_VARS(fileNameBuffer);
 
     memset(fileFullNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
-    sprintf(fileFullNameBuffer, "dot -Tpng logs/1_node.dot -o  %s/images/%s", dumper->dirForLogsPath, fileNameBuffer);
+    sprintf(fileFullNameBuffer, "dot -Tpng logs/%d_node.dot -o  %s/images/%s",
+            dumper->numberOfLogsBefore, dumper->dirForLogsPath, fileNameBuffer);
     LOG_DEBUG_VARS(fileFullNameBuffer);
     system(fileFullNameBuffer);
+    return DUMPER_STATUS_OK;
+}
+
+static void drawLabelToGraphvizVert(char* buffer, int nodeToPoint, const char* labelName) {
+    assert(buffer != NULL);
+    assert(labelName != NULL);
+
+    memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
+    snprintf(fileNameBuffer, FILE_NAME_BUFFER_SIZE,
+        "%sPointer [shape=rect, fontcolor=white, color=white, label=\"%s\"]\n",
+        labelName, labelName);
+    strcat(buffer, fileNameBuffer);
+
+    memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
+    snprintf(fileNameBuffer, FILE_NAME_BUFFER_SIZE,
+        "%sPointer -> %d [color=orange]\n",
+        labelName, nodeToPoint);
+    strcat(buffer, fileNameBuffer);
+}
+
+static DumperErrors drawMainLinkedList(Dumper* dumper, char* buffer, LinkedList* list) {
+    IF_ARG_NULL_RETURN(dumper);
+    IF_ARG_NULL_RETURN(buffer);
+
+    int curNode = list->fictiveNode;
+    for (size_t nodeInd = 0; nodeInd < list->listSize + 1 && nodeInd < dumper->maxNumOfNodesToDraw; ++nodeInd) {
+        memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
+        // FIXME: rename or add additional buffer for node struct dump string
+        //LOG_DEBUG_VARS(buffer);
+        IF_ERR_RETURN(addNodeDumpStructToBuffer(dumper, &list->nodes[curNode], &fileNameBuffer));
+        //LOG_DEBUG_VARS(curNode, buffer, fileNameBuffer);
+        LOG_DEBUG_VARS(strlen(buffer));
+        strcat(buffer, fileNameBuffer);
+
+        int nxt = list->nodes[curNode].next;
+
+        int weight = 1;
+        if (nodeInd == list->listSize)
+            weight = 0;
+        memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
+        snprintf(fileNameBuffer, FILE_NAME_BUFFER_SIZE,
+            "%d -> %d [weight=%d, color=lightblue]\n", curNode, nxt, weight);
+        strcat(buffer, fileNameBuffer);
+
+        memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
+        snprintf(fileNameBuffer, FILE_NAME_BUFFER_SIZE,
+            "%d -> %d [weight=%d, color=pink]\n", nxt, curNode, weight);
+        strcat(buffer, fileNameBuffer);
+
+        curNode = nxt;
+    }
+
+    drawLabelToGraphvizVert(buffer, list->fictiveNode, "fictive node");
+
+    return DUMPER_STATUS_OK;
+}
+
+static DumperErrors drawListOfFreeNodes(Dumper* dumper, char* buffer, LinkedList* list) {
+    IF_ARG_NULL_RETURN(dumper);
+    IF_ARG_NULL_RETURN(buffer);
+
+    LinkedListErrors error = checkIfLinkedListIsValid(list);
+    if (error != LINKED_LIST_STATUS_OK) {
+        LOG_ERROR(getLinkedListErrorMessage(error));
+        return DUMPER_ERROR_INVALID_ARGUMENT; // make normal error
+    }
+
+    LOG_DEBUG("drawing free nodes list");
+    int curNode = list->freeNodesHead;
+    for (size_t nodesDrawn = 0; nodesDrawn < dumper->maxNumOfNodesToDraw && curNode != -1; ++nodesDrawn) {
+        LOG_DEBUG_VARS(curNode);
+        memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
+        IF_ERR_RETURN(addNodeDumpStructToBuffer(dumper, &list->nodes[curNode], &fileNameBuffer));
+        strcat(buffer, fileNameBuffer);
+
+        int nxt = list->nodes[curNode].next;
+
+        memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
+        snprintf(fileNameBuffer, FILE_NAME_BUFFER_SIZE,
+            "%d -> %d [weight=1, color=lightblue]\n", curNode, nxt);
+        strcat(buffer, fileNameBuffer);
+
+        curNode = nxt;
+    }
+
+    drawLabelToGraphvizVert(buffer, list->freeNodesHead, "free nodes");
+
     return DUMPER_STATUS_OK;
 }
 
@@ -140,48 +247,25 @@ DumperErrors dumperDumpLinkedList(Dumper* dumper, LinkedList* list) {
     IF_NOT_COND_RETURN(outputFile != NULL,
                        DUMPER_ERROR_COULD_OPEN_FILE);
 
-    const size_t BIG_LIST_BUFFER_SIZE = 1 << 12;
+    const size_t BIG_LIST_BUFFER_SIZE = 1 << 15;
     char* buffer = (char*)calloc(BIG_LIST_BUFFER_SIZE, sizeof(char));
     IF_NOT_COND_RETURN(buffer != NULL,
                        DUMPER_ERROR_MEMORY_ALLOCATION_ERROR);
-    LOG_DEBUG_VARS(buffer);
-
 
     // FIXME: add errors check
     LOG_DEBUG_VARS("ok");
     int curNode = list->fictiveNode;
     LOG_DEBUG_VARS(curNode, list->fictiveNode);
     strcat(buffer, "digraph html {\n\
+        overlap=false\n\
+        splines=ortho\n\
         bgcolor=\"black\"\n\
         rankdir=LR\n\
         pad=0.2\n\
     ");
-    for (size_t nodeInd = 0; nodeInd < list->listSize + 1; ++nodeInd) {
-        memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
-        // FIXME: rename or add additional buffer for node struct dump string
-        //LOG_DEBUG_VARS(buffer);
-        IF_ERR_RETURN(addNodeDumpStructToBuffer(dumper, &list->nodes[curNode], &fileNameBuffer));
-        //LOG_DEBUG_VARS(curNode, buffer, fileNameBuffer);
-        LOG_DEBUG_VARS(strlen(buffer));
-        strcat(buffer, fileNameBuffer);
 
-        int nxt = list->nodes[curNode].next;
-
-        int weight = 1;
-        if (nodeInd == list->listSize)
-            weight = 0;
-        memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
-        snprintf(fileNameBuffer, FILE_NAME_BUFFER_SIZE,
-            "%d -> %d [weight=%d, color=lightblue]\n", curNode, nxt, weight);
-        strcat(buffer, fileNameBuffer);
-
-        memset(fileNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
-        snprintf(fileNameBuffer, FILE_NAME_BUFFER_SIZE,
-            "%d -> %d [weight=%d, color=pink]\n", nxt, curNode, weight);
-        strcat(buffer, fileNameBuffer);
-
-        curNode = nxt;
-    }
+    IF_ERR_RETURN(drawMainLinkedList(dumper, buffer, list));
+    IF_ERR_RETURN(drawListOfFreeNodes(dumper, buffer, list));
 
     strcat(buffer, "}\n");
     LOG_DEBUG_VARS(buffer);
@@ -200,7 +284,7 @@ DumperErrors dumperDumpLinkedList(Dumper* dumper, LinkedList* list) {
     LOG_DEBUG_VARS(fileFullNameBuffer);
     system(fileFullNameBuffer);
 
-    // FIXME: close buffer on error
+    // FIXME: free buffer on error
     FREE(buffer);
 
     return DUMPER_STATUS_OK;

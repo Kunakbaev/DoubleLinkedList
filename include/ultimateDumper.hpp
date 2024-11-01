@@ -14,10 +14,12 @@ enum DumperErrors {
 struct Dumper {
     const char* dirForLogsPath;
     const char* outputFileFormat;
+    size_t      maxNumOfNodesToDraw;
     size_t      numberOfLogsBefore; // ASK: we want every file to have unique name, file with bigger number was outputed later in program, maybe it will be automaticly sorted by time of creation
 };
 
 DumperErrors dumperConstructor(Dumper* dumper,
+                               size_t maxNumOfNodesToDraw,
                                const char* dirForLogsPath,
                                const char* outputFileFormat);
 DumperErrors dumperDumpLinkedListNode(Dumper* dumper, const Node* node);

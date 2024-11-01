@@ -1,9 +1,0 @@
-    digraph html {                      
-        iamnode [shape=none, margin=0, label=<                                         
-        <TABLE>                                         
-            <TR><TD>arrInd: 10</TD></TR>                                         
-            <TR><TD>dataInd: 1010</TD></TR>                                         
-            <TR><TD>next: 9</TD></TR>           
-            <TR><TD>prev: 10</TD></TR>   
-        </TABLE>>];                                         
-    }

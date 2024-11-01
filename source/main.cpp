@@ -22,36 +22,34 @@ int main() {
 
     LinkedList list = {};
     IF_MAIN_ERR_RETURN(constructLinkedList(&list));
+
+    LOG_DEBUG("---------------------");
+    IF_MAIN_ERR_RETURN(dumpLinkedList(&list));
+    LOG_DEBUG("---------------------");
+
     IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 10));
     IF_MAIN_ERR_RETURN(insertAndDump(&list, 1, 20));
     IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 30));
+    IF_MAIN_ERR_RETURN(insertAndDump(&list, 3, 40));
+    IF_MAIN_ERR_RETURN(insertAndDump(&list, 2, 50));
+    IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 60));
 
     Node node = {1010, 228, 9, 10};
     Dumper dumper = {};
     // add error check
-    dumperConstructor(&dumper, "logs", "png");
-    dumperDumpLinkedList(&dumper, &list);
+    dumperConstructor(&dumper, 3, "logs", "png");
+    dumperDumpLinkedListNode(&dumper, &list.nodes[0]);
+    dumperDumpLinkedListNode(&dumper, &list.nodes[1]);
+    dumperDumpLinkedListNode(&dumper, &list.nodes[2]);
+    // dumperDumpLinkedList(&dumper, &list);
     // dumperDumpLinkedListNode(&dumper, &node);
     // node.arrInd = 10;
     // dumperDumpLinkedListNode(&dumper, &node);
     dumperDestructor(&dumper);
 
-//     LinkedList list = {};
-//     IF_MAIN_ERR_RETURN(constructLinkedList(&list));
-//
-//     LOG_DEBUG("---------------------");
-//     IF_MAIN_ERR_RETURN(dumpLinkedList(&list));
-//     LOG_DEBUG("---------------------");
-//
-//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 10));
-//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 1, 20));
-//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 30));
-//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 3, 40));
-//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 2, 50));
-//     IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 60));
-//     IF_MAIN_ERR_RETURN(deleteAndDump(&list, 1));
-//
-//     IF_MAIN_ERR_RETURN(destructLinkedList(&list));
+    IF_MAIN_ERR_RETURN(deleteAndDump(&list, 1));
+
+    IF_MAIN_ERR_RETURN(destructLinkedList(&list));
 
     return 0;
 }
