@@ -21,7 +21,7 @@ DumperErrors dumperConstructor(Dumper* dumper,
                                const char* dirForLogsPath,
                                const char* outputFileFormat);
 DumperErrors dumperDumpLinkedListNode(Dumper* dumper, const Node* node);
-DumperErrors dumperDumpLinkedList(Dumper* dumper);
+DumperErrors dumperDumpLinkedList(Dumper* dumper, LinkedList* list);
 DumperErrors dumperDestructor(Dumper* dumper);
 
 const char* getDumperErrorMessage(DumperErrors error);

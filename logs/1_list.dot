@@ -1,0 +1,45 @@
+digraph html {
+        bgcolor="black"
+        rankdir=LR
+        pad=0.2
+        0 [shape=none, margin=0, fontcolor=white, color=white, label=< 
+        <TABLE cellspacing="0"> 
+            <TR><TD>arrInd: 0</TD></TR> 
+            <TR><TD>dataInd: 0</TD></TR>
+            <TR><TD>next: 3</TD></TR>
+            <TR><TD>prev: 2</TD></TR>
+        </TABLE> 
+    >];
+0 -> 3 [weight=1, color=lightblue]
+3 -> 0 [weight=1, color=pink]
+    3 [shape=none, margin=0, fontcolor=white, color=white, label=< 
+        <TABLE cellspacing="0"> 
+            <TR><TD>arrInd: 3</TD></TR> 
+            <TR><TD>dataInd: 30</TD></TR>
+            <TR><TD>next: 1</TD></TR>
+            <TR><TD>prev: 0</TD></TR>
+        </TABLE> 
+    >];
+3 -> 1 [weight=1, color=lightblue]
+1 -> 3 [weight=1, color=pink]
+    1 [shape=none, margin=0, fontcolor=white, color=white, label=< 
+        <TABLE cellspacing="0"> 
+            <TR><TD>arrInd: 1</TD></TR> 
+            <TR><TD>dataInd: 10</TD></TR>
+            <TR><TD>next: 2</TD></TR>
+            <TR><TD>prev: 3</TD></TR>
+        </TABLE> 
+    >];
+1 -> 2 [weight=1, color=lightblue]
+2 -> 1 [weight=1, color=pink]
+    2 [shape=none, margin=0, fontcolor=white, color=white, label=< 
+        <TABLE cellspacing="0"> 
+            <TR><TD>arrInd: 2</TD></TR> 
+            <TR><TD>dataInd: 20</TD></TR>
+            <TR><TD>next: 0</TD></TR>
+            <TR><TD>prev: 1</TD></TR>
+        </TABLE> 
+    >];
+2 -> 0 [weight=0, color=lightblue]
+0 -> 2 [weight=0, color=pink]
+}

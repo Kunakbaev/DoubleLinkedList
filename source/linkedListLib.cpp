@@ -36,11 +36,12 @@ LinkedListErrors initFreeNodesList(LinkedList* list) {
     IF_ARG_NULL_RETURN(list);
 
     list->freeNodesHead = -1;
-    for (size_t nodeInd = 0; nodeInd < MAX_LIST_SIZE; ++nodeInd) {
+    // I want fictive node to have arrInd equal to 0, also it's easier to debug with arrIndexes
+    for (int nodeInd = (int)MAX_LIST_SIZE - 1; nodeInd >= 0; --nodeInd) {
         Node* node = &list->nodes[nodeInd];
         node->arrInd = nodeInd;
         IF_ERR_RETURN(makeLinkedListNodeFree(list, &node));
-        // LOG_DEBUG_VARS(nodeInd, list->nodes[nodeInd].arrInd);
+        LOG_DEBUG_VARS(nodeInd, list->nodes[nodeInd].arrInd);
     }
 
     return LINKED_LIST_STATUS_OK;
@@ -112,6 +113,9 @@ LinkedListErrors constructLinkedList(LinkedList* list) {
     IF_ERR_RETURN(getLinkedListFreeNode(list, &element));
     assert(element != NULL); // TODO: error check
     list->fictiveNode = element->arrInd;
+    assert(list->fictiveNode == 0); // it's convenient to think than element at index 0 is special
+
+    LOG_DEBUG_VARS(list->fictiveNode);
     IF_ERR_RETURN(dumpLinkedListNode(element));
     element->next = element->prev = element->arrInd; // loop
 

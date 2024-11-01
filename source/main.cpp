@@ -20,13 +20,20 @@ int main() {
     setLoggingLevel(DEBUG);
     LOG_DEBUG("Hello world");
 
+    LinkedList list = {};
+    IF_MAIN_ERR_RETURN(constructLinkedList(&list));
+    IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 10));
+    IF_MAIN_ERR_RETURN(insertAndDump(&list, 1, 20));
+    IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 30));
+
     Node node = {1010, 228, 9, 10};
     Dumper dumper = {};
     // add error check
     dumperConstructor(&dumper, "logs", "png");
-    dumperDumpLinkedListNode(&dumper, &node);
-    node.arrInd = 10;
-    dumperDumpLinkedListNode(&dumper, &node);
+    dumperDumpLinkedList(&dumper, &list);
+    // dumperDumpLinkedListNode(&dumper, &node);
+    // node.arrInd = 10;
+    // dumperDumpLinkedListNode(&dumper, &node);
     dumperDestructor(&dumper);
 
 //     LinkedList list = {};
