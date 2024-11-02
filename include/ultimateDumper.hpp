@@ -2,7 +2,6 @@
 #define INCLUDE_ULTIMATE_DUMPER_HPP
 
 // ASK: circular import?
-#include "linkedListLib.hpp"
 
 enum DumperErrors {
     DUMPER_STATUS_OK                        = 0,
@@ -12,19 +11,15 @@ enum DumperErrors {
     DUMPER_ERROR_LIST_SUBLIB_ERROR          = 4,
 };
 
-struct Dumper {
-    const char* dirForLogsPath;
-    const char* outputFileFormat;
-    size_t      maxNumOfNodesToDraw;
-    size_t      numberOfLogsBefore; // ASK: we want every file to have unique name, file with bigger number was outputed later in program, maybe it will be automaticly sorted by time of creation
-};
+#include "dumperStruct.hpp"
+#include "linkedListLib.hpp"
 
 DumperErrors dumperConstructor(Dumper* dumper,
                                size_t maxNumOfNodesToDraw,
                                const char* dirForLogsPath,
                                const char* outputFileFormat);
 DumperErrors dumperDumpLinkedListNode(Dumper* dumper, const Node* node);
-DumperErrors dumperDumpLinkedList(Dumper* dumper, LinkedList* list);
+DumperErrors dumperDumpLinkedList(Dumper* dumper, const LinkedList* list);
 DumperErrors dumperDestructor(Dumper* dumper);
 
 const char* getDumperErrorMessage(DumperErrors error);

@@ -15,9 +15,11 @@ const char* getLinkedListErrorMessage(LinkedListErrors error) {
         case LINKED_LIST_ERROR_NO_AVAILABLE_FREE_NODES:
             return "Linked list error: free node is required, however there are no available free nodes.\n";
         case LINKED_LIST_ERROR_NO_NODE_WITH_SUCH_DATA_FOUND:
-            return "Linked list error: node with such partition value does not exist.\n";
+            return "Linked list error: node with such data does not exist.\n";
         case LINKED_LIST_ERROR_DELETION_ON_EMPTY_LIST:
             return "Linked list error: list is empty, but deletion of element happens.\n";
+        case LINKED_LIST_DUMPER_ERROR:
+            return "Linked list error: error occured in dumper sub module.\n";
 
         default:
             return "Linked list error: unknown error.\n";

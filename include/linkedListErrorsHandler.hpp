@@ -12,6 +12,7 @@ enum LinkedListErrors {
     LINKED_LIST_ERROR_NO_AVAILABLE_FREE_NODES           = 5,
     LINKED_LIST_ERROR_NO_NODE_WITH_SUCH_DATA_FOUND      = 6,
     LINKED_LIST_ERROR_DELETION_ON_EMPTY_LIST            = 7,
+    LINKED_LIST_DUMPER_ERROR                            = 8,
 };
 
 const char* getLinkedListErrorMessage(LinkedListErrors error);

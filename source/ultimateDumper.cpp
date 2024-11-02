@@ -84,15 +84,15 @@ static DumperErrors addNodeDumpStructToBuffer(Dumper* dumper, const Node* node) 
     IF_ARG_NULL_RETURN(buffer);
 
     memset(tmpBuffer, 0, TMP_BUFFER_SIZE);
-    snprintf(tmpBuffer, TMP_BUFFER_SIZE, "\
-    %d [shape=none, margin=0, fontcolor=white, color=white, label=< \n\
-        <TABLE cellspacing=\"0\"> \n\
-            <TR><TD>arrInd: %d</TD></TR> \n\
-            <TR><TD>dataInd: %d</TD></TR>\n\
-            <TR><TD>next: %d</TD></TR>\n\
-            <TR><TD>prev: %d</TD></TR>\n\
-        </TABLE> \n\
-    >];\n", node->arrInd, node->arrInd, node->data, node->next, node->prev);
+    snprintf(tmpBuffer, TMP_BUFFER_SIZE,
+    "%d [shape=none, margin=0, fontcolor=white, color=white, label=< \n"
+        "<TABLE cellspacing=\"0\"> \n"
+            "<TR><TD>arrInd: %d</TD></TR> \n"
+            "<TR><TD>dataInd: %d</TD></TR>\n"
+            "<TR><TD>next: %d</TD></TR>\n"
+            "<TR><TD>prev: %d</TD></TR>\n"
+            "</TABLE> \n"
+            " >];\n", node->arrInd, node->arrInd, node->data, node->next, node->prev);
 
     strncat(buffer, tmpBuffer, BUFFER_SIZE);
 
@@ -160,7 +160,7 @@ static void drawLabelToGraphvizVert(int nodeToPoint, const char* labelName) {
     strncat(buffer, tmpBuffer, BUFFER_SIZE);
 }
 
-static DumperErrors drawMainLinkedList(Dumper* dumper, LinkedList* list) {
+static DumperErrors drawMainLinkedList(Dumper* dumper, const LinkedList* list) {
     IF_ARG_NULL_RETURN(dumper);
     IF_ARG_NULL_RETURN(buffer);
 
@@ -191,7 +191,7 @@ static DumperErrors drawMainLinkedList(Dumper* dumper, LinkedList* list) {
     return DUMPER_STATUS_OK;
 }
 
-static DumperErrors drawListOfFreeNodes(Dumper* dumper, LinkedList* list) {
+static DumperErrors drawListOfFreeNodes(Dumper* dumper, const LinkedList* list) {
     IF_ARG_NULL_RETURN(dumper);
     IF_ARG_NULL_RETURN(buffer);
     LIST_ERR_CHECK(checkIfLinkedListIsValid(list));
@@ -215,7 +215,7 @@ static DumperErrors drawListOfFreeNodes(Dumper* dumper, LinkedList* list) {
     return DUMPER_STATUS_OK;
 }
 
-DumperErrors dumperDumpLinkedList(Dumper* dumper, LinkedList* list) {
+DumperErrors dumperDumpLinkedList(Dumper* dumper, const LinkedList* list) {
     IF_ARG_NULL_RETURN(dumper);
     IF_ARG_NULL_RETURN(list);
     LIST_ERR_CHECK(checkIfLinkedListIsValid(list));
@@ -269,6 +269,7 @@ DumperErrors dumperDumpLinkedList(Dumper* dumper, LinkedList* list) {
             "%d_list.%s", dumper->numberOfLogsBefore, dumper->outputFileFormat);
     LOG_DEBUG_VARS(fileNameBuffer);
 
+    // TODO: put assert for ;
     memset(fileFullNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
     snprintf(fileFullNameBuffer, FULL_FILE_NAME_BUFFER_SIZE,
              "dot -Tpng logs/dots/%d_list.dot -o %s/images/%s",
