@@ -48,8 +48,7 @@ LinkedListErrors insertAndDump(LinkedList* list, int position, int value) {
         return LINKED_LIST_ERROR_INVALID_ARGUMENT;
     }
 
-    // ASK: is there need to check errors;
-    IF_MAIN_ERR_RETURN(superSlow_insertAfterPosition(list, position, value));
+    IF_MAIN_ERR_RETURN(superSlow_insertAfterPosition(list, position, (const void*)value));
     IF_MAIN_ERR_RETURN(dumpLinkedList(list));
     return LINKED_LIST_STATUS_OK;
 }

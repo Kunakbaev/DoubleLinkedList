@@ -69,7 +69,14 @@ DumperErrors dumperConstructor(Dumper* dumper,
     IF_NOT_COND_RETURN(buffer != NULL,
                        DUMPER_ERROR_MEMORY_ALLOCATION_ERROR);
 
-    system("rm -rf logs");
+    // WARNING: whole root directory can be deleted, bruh, or some nasty command executed
+    // memset(fileFullNameBuffer, 0, FULL_FILE_NAME_BUFFER_SIZE);
+    // snprintf(fileFullNameBuffer, FULL_FILE_NAME_BUFFER_SIZE, "rm -rf %s", dirForLogsPath);
+    // system(fileFullNameBuffer);
+    // memset(fileFullNameBuffer, 0, FULL_FILE_NAME_BUFFER_SIZE);
+    // snprintf(fileFullNameBuffer, FULL_FILE_NAME_BUFFER_SIZE, "mkdir -p %s", dirForLogsPath);
+    // system(fileFullNameBuffer);
+    // system("rm -rf %s", fileFullNameBuffer);
     system("mkdir -p logs");
     system("mkdir -p logs/images");
     system("mkdir -p logs/html");
@@ -83,18 +90,28 @@ static DumperErrors addNodeDumpStructToBuffer(Dumper* dumper, const Node* node) 
     IF_ARG_NULL_RETURN(node);
     IF_ARG_NULL_RETURN(buffer);
 
+    // const size_t DATA_STRING_LEN = 50;
+    // char* dataString = (char*)calloc(DATA_STRING_LEN, sizeof(char));
+    // IF_NOT_COND_RETURN(dataString != NULL, DUMPER_ERROR_MEMORY_ALLOCATION_ERROR);
+    // const char* format = varToFormat(node->data);
+    // LOG_DEBUG_VARS(format);
+    // sprintf(dataString, format, node->data);
+    // LOG_DEBUG_VARS(dataString, node->data);
+
     memset(tmpBuffer, 0, TMP_BUFFER_SIZE);
     snprintf(tmpBuffer, TMP_BUFFER_SIZE,
     "%d [shape=none, margin=0, fontcolor=white, color=white, label=< \n"
         "<TABLE cellspacing=\"0\"> \n"
             "<TR><TD>arrInd: %d</TD></TR> \n"
-            "<TR><TD>dataInd: %d</TD></TR>\n"
+            "<TR><TD>data: %d</TD></TR>\n"
             "<TR><TD>next: %d</TD></TR>\n"
             "<TR><TD>prev: %d</TD></TR>\n"
             "</TABLE> \n"
             " >];\n", node->arrInd, node->arrInd, node->data, node->next, node->prev);
 
+    LOG_DEBUG_VARS(node->data);
     strncat(buffer, tmpBuffer, BUFFER_SIZE);
+    // FREE(dataString);
 
     return DUMPER_STATUS_OK;
 }
@@ -275,6 +292,7 @@ DumperErrors dumperDumpLinkedList(Dumper* dumper, const LinkedList* list) {
              "dot -Tpng logs/dots/%d_list.dot -o %s/images/%s",
             dumper->numberOfLogsBefore, dumper->dirForLogsPath, fileNameBuffer);
     LOG_DEBUG_VARS(fileFullNameBuffer);
+    // WARNING: some nasty command can be substituted
     system(fileFullNameBuffer);
 
     // FIXME: free buffer on error
