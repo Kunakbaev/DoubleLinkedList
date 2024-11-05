@@ -3,7 +3,7 @@ CFLAGS 		 := -D _DEBUG -lm -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggres
 LOGGER_FLAGS :=
 CFLAGS = -D _DEBUG
 # CFLAGS += -D NDEBUG
-CFLAGS += -fsanitize=address
+# CFLAGS += -fsanitize=address
 
 MY_LOG_LIB_NAME    := my_loglib
 SOURCE_DIR         := source

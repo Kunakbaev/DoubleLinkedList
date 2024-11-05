@@ -7,7 +7,11 @@
     COMMON_IF_ARG_NULL_RETURN(arg, LINKED_LIST_ERROR_INVALID_ARGUMENT, getLinkedListErrorMessage)
 
 #define IF_ERR_RETURN(error) \
-    COMMON_IF_ERR_RETURN(error, getLinkedListErrorMessage, LINKED_LIST_STATUS_OK)
+    do {\
+        COMMON_IF_ERR_RETURN(error, getLinkedListErrorMessage, LINKED_LIST_STATUS_OK);\
+        DEBUG_VARS_TO_DUMPER_ALL_LOGS_FILE((Dumper*)&list->dumper, #error);\
+    } while(0) \
+
 
 #define IF_NOT_COND_RETURN(condition, error) \
     COMMON_IF_NOT_COND_RETURN(condition, error, getLinkedListErrorMessage)
@@ -49,6 +53,7 @@ LinkedListErrors initFreeNodesList(LinkedList* list) {
         node->arrInd = nodeInd;
         IF_ERR_RETURN(makeLinkedListNodeFree(list, &node));
         LOG_DEBUG_VARS(nodeInd, list->nodes[nodeInd].arrInd);
+
     }
 
     return LINKED_LIST_STATUS_OK;
@@ -175,7 +180,7 @@ LinkedListErrors constructLinkedList(LinkedList* list, Dumper dumper) {
     assert(list->fictiveNode == 0); // it's convenient to think than element at index 0 is special
 
     LOG_DEBUG_VARS(list->fictiveNode);
-    IF_ERR_RETURN(dumpLinkedListNode(element));
+    IF_ERR_RETURN(dumpLinkedListNode(&list->dumper, element));
     element->next = element->prev = element->arrInd; // loop
 
     LOG_DEBUG_VARS(list->fictiveNode);
@@ -389,7 +394,7 @@ LinkedListErrors deleteFromRealArrIndex(LinkedList* list,
     IF_NOT_COND_RETURN(arrayPosition != list->fictiveNode,
                        LINKED_LIST_ERROR_INVALID_ARGUMENT);
     IF_NOT_COND_RETURN(arrayPosition < MAX_LIST_SIZE,
-                       LINKED_LIST_ERROR_INVALID_ARGUMENT); // TODO: add error
+                       LINKED_LIST_ERROR_INVALID_ARGUMENT); // TODO: add error code
     IF_NOT_COND_RETURN(list->listSize != 0,
                        LINKED_LIST_ERROR_DELETION_ON_EMPTY_LIST);
     RETURN_IF_INVALID(list);
@@ -471,10 +476,11 @@ LinkedListErrors deleteListTail(LinkedList* list) {
 
 // ------------------------------------        DUMPING LIST         ------------------------------------
 
-LinkedListErrors dumpLinkedListNode(const Node* node) {
+LinkedListErrors dumpLinkedListNode(const Dumper* dumper, const Node* node) {
     IF_ARG_NULL_RETURN(node);
 
     LOG_DEBUG_VARS(node->arrInd, node->data, node->next, node->prev);
+    DEBUG_VARS_TO_DUMPER_ALL_LOGS_FILE((Dumper*)dumper, node->arrInd, node->data, node->next, node->prev);
 
     return LINKED_LIST_STATUS_OK;
 }
@@ -486,16 +492,21 @@ LinkedListErrors dumpLinkedList(const LinkedList* list) {
     LOG_DEBUG("-----------------------------------\nLinked list:");
     LOG_DEBUG_VARS(list, list->listSize, list->nodes);
 
+    DEBUG_VARS_TO_DUMPER_ALL_LOGS_FILE((Dumper*)&list->dumper, list, list->listSize, list->nodes);
+    //DEBUG_VARS_TO_DUMPER_ALL_LOGS_FILE((Dumper*)&list->dumper, list, list->listSize, list->nodes);
+    //exit(0);
+
     int curNode = getListHead(list);
     for (size_t nodeInd = 0; nodeInd < list->listSize; ++nodeInd) {
         assert(curNode < MAX_LIST_SIZE);
         int nxt = list->nodes[curNode].next;
-        IF_ERR_RETURN(dumpLinkedListNode(&list->nodes[curNode]));
+        IF_ERR_RETURN(dumpLinkedListNode(&list->dumper, &list->nodes[curNode]));
 
         // we validated list, so no errors should occur
         curNode = nxt;
     }
     LOG_DEBUG("-----------------------------------");
+    DEBUG_MESSAGE_TO_DUMPER_ALL_LOGS_FILE((Dumper*)&list->dumper, "---------------------------------------");
 
     DUMPER_ERR_CHECK(dumperDumpLinkedList((Dumper*)&list->dumper, list));
 

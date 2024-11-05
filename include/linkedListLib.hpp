@@ -57,7 +57,7 @@ LinkedListErrors insertAfterTail(LinkedList* list,
 
 LinkedListErrors checkIfLinkedListIsValid(const LinkedList* list);
 LinkedListErrors constructLinkedList(LinkedList* list, Dumper dumper);
-LinkedListErrors dumpLinkedListNode(const Node* node);
+LinkedListErrors dumpLinkedListNode(const Dumper* dumper, const Node* node);
 LinkedListErrors dumpLinkedList(const LinkedList* list);
 LinkedListErrors destructLinkedList(LinkedList* list);
 

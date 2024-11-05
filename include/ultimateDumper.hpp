@@ -18,11 +18,33 @@ DumperErrors dumperConstructor(Dumper* dumper,
                                size_t maxNumOfNodesToDraw,
                                const char* dirForLogsPath,
                                const char* outputFileFormat);
+void dumperAddDebugInfoToAllLogsFile(Dumper* dumper, const char* debugInfo);
+void dumperAddImgToAllLogsFile(Dumper* dumper, const char* imagePath);
 DumperErrors dumperDumpLinkedListNode(Dumper* dumper, const Node* node);
 DumperErrors dumperDumpLinkedList(Dumper* dumper, const LinkedList* list);
 DumperErrors dumperDestructor(Dumper* dumper);
 
 const char* getDumperErrorMessage(DumperErrors error);
+
+
+#define DEBUG_VARS_TO_DUMPER_ALL_LOGS_FILE(dumper, ...) \
+    do {\
+        dumperAddDebugInfoToAllLogsFile(dumper, "<pre style=\"color: white\">\n");\
+        stateLogFile((dumper)->allLogsFile);\
+        LOG_DEBUG_VARS(__VA_ARGS__);\
+        flushLogFile();\
+        dumperAddDebugInfoToAllLogsFile(dumper, "</pre>\n");\
+    } while (0)
+
+#define DEBUG_MESSAGE_TO_DUMPER_ALL_LOGS_FILE(dumper, message) \
+    do {\
+        dumperAddDebugInfoToAllLogsFile(dumper, "<pre style=\"color: white\">\n");\
+        stateLogFile((dumper)->allLogsFile);\
+        LOG_DEBUG(message);\
+        flushLogFile();\
+        stateLogFile(NULL);\
+        dumperAddDebugInfoToAllLogsFile(dumper, "</pre>\n");\
+    } while (0)
 
 #endif
 

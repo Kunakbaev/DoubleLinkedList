@@ -4,17 +4,29 @@
 #include "../include/linkedListLib.hpp"
 #include "../include/ultimateDumper.hpp"
 
-#define IF_MAIN_ERR_RETURN(error)                                   \
+#define IF_MAIN_ERR_RETURN_FOR_SLOW_FUNCS(error)                                   \
     do {                                                            \
-        if (error != LINKED_LIST_STATUS_OK) {                         \
-            LOG_ERROR(getLinkedListErrorMessage(error));             \
-            assert(error != LINKED_LIST_STATUS_OK);                   \
-            return error;                                           \
+        LinkedListErrors tmp = error;\
+        assert(sizeof(#error) >= 210);\
+        if (tmp != LINKED_LIST_STATUS_OK) {                         \
+            LOG_ERROR(getLinkedListErrorMessage(tmp));             \
+            assert(tmp != LINKED_LIST_STATUS_OK);                   \
+            return tmp;                                           \
         }                                                           \
     } while(0)
 
-LinkedListErrors insertAndDump(LinkedList* list, int position, int value);
-LinkedListErrors deleteAndDump(LinkedList* list, int position);
+#define IF_MAIN_ERR_RETURN(error)                                   \
+    do {                                                            \
+        LinkedListErrors tmp = error;\
+        if (tmp != LINKED_LIST_STATUS_OK) {                         \
+            LOG_ERROR(getLinkedListErrorMessage(tmp));             \
+            assert(tmp != LINKED_LIST_STATUS_OK);                   \
+            return tmp;                                           \
+        }                                                           \
+    } while(0)
+
+LinkedListErrors insertAndDumpSuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982(LinkedList* list, int position, int value);
+LinkedListErrors deleteAndDumperSuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820(LinkedList* list, int position);
 
 int main() {
     setLoggingLevel(DEBUG);
@@ -27,22 +39,22 @@ int main() {
     IF_MAIN_ERR_RETURN(constructLinkedList(&list, dumper));
 
     LOG_DEBUG("---------------------");
-    IF_MAIN_ERR_RETURN(dumpLinkedList(&list));
+    dumpLinkedList(&list);
     LOG_DEBUG("---------------------");
 
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 10));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 1, 20));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 30));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 3, 40));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 2, 50));
-    IF_MAIN_ERR_RETURN(insertAndDump(&list, 0, 60));
+    IF_MAIN_ERR_RETURN_FOR_SLOW_FUNCS(insertAndDumpSuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982(&list, 0, 10));
+    IF_MAIN_ERR_RETURN_FOR_SLOW_FUNCS(insertAndDumpSuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982(&list, 1, 20));
+    IF_MAIN_ERR_RETURN_FOR_SLOW_FUNCS(insertAndDumpSuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982(&list, 0, 30));
+    IF_MAIN_ERR_RETURN_FOR_SLOW_FUNCS(insertAndDumpSuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982(&list, 3, 40));
+    IF_MAIN_ERR_RETURN_FOR_SLOW_FUNCS(insertAndDumpSuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982(&list, 2, 50));
+    IF_MAIN_ERR_RETURN_FOR_SLOW_FUNCS(deleteAndDumperSuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820(&list, 1));
 
     IF_MAIN_ERR_RETURN(destructLinkedList(&list));
 
     return 0;
 }
 
-LinkedListErrors insertAndDump(LinkedList* list, int position, int value) {
+LinkedListErrors insertAndDumpSuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982SuperSlow$_18902982(LinkedList* list, int position, int value) {
     if (list == NULL) {
         LOG_ERROR(getLinkedListErrorMessage(LINKED_LIST_ERROR_INVALID_ARGUMENT));
         return LINKED_LIST_ERROR_INVALID_ARGUMENT;
@@ -53,7 +65,7 @@ LinkedListErrors insertAndDump(LinkedList* list, int position, int value) {
     return LINKED_LIST_STATUS_OK;
 }
 
-LinkedListErrors deleteAndDump(LinkedList* list, int position) {
+LinkedListErrors deleteAndDumperSuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820SuperSlow$_123891kjf$adsi820(LinkedList* list, int position) {
     if (list == NULL) {
         LOG_ERROR(getLinkedListErrorMessage(LINKED_LIST_ERROR_INVALID_ARGUMENT));
         return LINKED_LIST_ERROR_INVALID_ARGUMENT;

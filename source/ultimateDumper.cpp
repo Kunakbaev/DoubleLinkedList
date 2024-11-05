@@ -56,6 +56,17 @@ DumperErrors dumperConstructor(Dumper* dumper,
     dumper->outputFileFormat    = outputFileFormat;
     dumper->numberOfLogsBefore  = 0;
 
+    char* allLogsFilePath = (char*)calloc(FULL_FILE_NAME_BUFFER_SIZE, sizeof(char));
+    snprintf(allLogsFilePath, FULL_FILE_NAME_BUFFER_SIZE,
+             "%s/allLogs.html", dumper->dirForLogsPath);
+    IF_NOT_COND_RETURN(allLogsFilePath != NULL,
+                       DUMPER_ERROR_MEMORY_ALLOCATION_ERROR);
+    dumper->allLogsFile = fopen(allLogsFilePath, "w");
+    IF_NOT_COND_RETURN(dumper->allLogsFile != NULL,
+                       DUMPER_ERROR_COULD_OPEN_FILE);
+    FREE(allLogsFilePath);
+    setvbuf(dumper->allLogsFile, NULL, 0, _IOFBF);
+
     fileFullNameBuffer = (char*)calloc(FULL_FILE_NAME_BUFFER_SIZE, sizeof(char));
     IF_NOT_COND_RETURN(fileFullNameBuffer != NULL,
                        DUMPER_ERROR_MEMORY_ALLOCATION_ERROR);
@@ -82,7 +93,28 @@ DumperErrors dumperConstructor(Dumper* dumper,
     system("mkdir -p logs/html");
     system("mkdir -p logs/dots");
 
+    dumperAddDebugInfoToAllLogsFile(dumper, "<body style=\"background: black; overflow: scroll; margin: 15px\">");
+
     return DUMPER_STATUS_OK;
+}
+
+void dumperAddDebugInfoToAllLogsFile(Dumper* dumper, const char* debugInfo) {
+    assert(dumper    != NULL);
+    assert(debugInfo != NULL);
+
+    // fprintf(dumper->allLogsFile, "<p>%s</p>\n", debugInfo);
+    fprintf(dumper->allLogsFile, debugInfo);
+    fflush(dumper->allLogsFile);
+}
+
+void dumperAddImgToAllLogsFile(Dumper* dumper, const char* imagePath) {
+    assert(dumper    != NULL);
+    assert(imagePath != NULL);
+
+    fflush(NULL);
+    fprintf(dumper->allLogsFile, "<img src=\"%s\"></img>\n", imagePath);
+    fflush(NULL);
+    LOG_ERROR("---------------");
 }
 
 static DumperErrors addNodeDumpStructToBuffer(Dumper* dumper, const Node* node) {
@@ -232,6 +264,39 @@ static DumperErrors drawListOfFreeNodes(Dumper* dumper, const LinkedList* list) 
     return DUMPER_STATUS_OK;
 }
 
+DumperErrors addDumpToHtmlFile(Dumper* dumper, const LinkedList* list) {
+    IF_ARG_NULL_RETURN(dumper);
+    IF_ARG_NULL_RETURN(list);
+
+    LOG_DEBUG("ok");
+    memset(fileFullNameBuffer, 0, FULL_FILE_NAME_BUFFER_SIZE);
+    LOG_DEBUG("oik");
+    // TODO: rewrite with snprintf
+    snprintf(fileFullNameBuffer, FULL_FILE_NAME_BUFFER_SIZE, "%s/html/%d_list.html",
+             dumper->dirForLogsPath, dumper->numberOfLogsBefore);
+
+    LOG_DEBUG_VARS(fileFullNameBuffer);
+    FILE* outputFile = fopen(fileFullNameBuffer, "w");
+    IF_NOT_COND_RETURN(outputFile != NULL,
+                       DUMPER_ERROR_COULD_OPEN_FILE);
+
+    fprintf(outputFile, "<pre>\n"
+    "<H1>Bruh</H1>\n"
+    "<img src=\"../images/%d_list.%s\"></img>\n",
+    dumper->numberOfLogsBefore, dumper->outputFileFormat);
+
+    fclose(outputFile);
+
+    return DUMPER_STATUS_OK;
+}
+
+static void drawNullNode(Dumper* dumper) {
+    memset(tmpBuffer, 0, TMP_BUFFER_SIZE);
+    snprintf(tmpBuffer, TMP_BUFFER_SIZE,
+        "-1 [shape=rect, fontcolor=white, color=white, label=\"null pointer\"]\n");
+    strncat(buffer, tmpBuffer, BUFFER_SIZE);
+}
+
 DumperErrors dumperDumpLinkedList(Dumper* dumper, const LinkedList* list) {
     IF_ARG_NULL_RETURN(dumper);
     IF_ARG_NULL_RETURN(list);
@@ -273,6 +338,7 @@ DumperErrors dumperDumpLinkedList(Dumper* dumper, const LinkedList* list) {
         pad=0.2\n\
     ", BUFFER_SIZE);
 
+    drawNullNode(dumper);
     IF_ERR_RETURN(drawMainLinkedList(dumper, list));
     IF_ERR_RETURN(drawListOfFreeNodes(dumper, list));
 
@@ -295,7 +361,14 @@ DumperErrors dumperDumpLinkedList(Dumper* dumper, const LinkedList* list) {
     // WARNING: some nasty command can be substituted
     system(fileFullNameBuffer);
 
-    // FIXME: free buffer on error
+    IF_ERR_RETURN(addDumpToHtmlFile(dumper, list));
+
+
+    memset(fileFullNameBuffer, 0, FILE_NAME_BUFFER_SIZE);
+    snprintf(fileFullNameBuffer, FULL_FILE_NAME_BUFFER_SIZE,
+             "images/%s", fileNameBuffer);
+    LOG_DEBUG_VARS(fileFullNameBuffer);
+    dumperAddImgToAllLogsFile(dumper, fileFullNameBuffer);
 
     return DUMPER_STATUS_OK;
 }
@@ -303,10 +376,13 @@ DumperErrors dumperDumpLinkedList(Dumper* dumper, const LinkedList* list) {
 DumperErrors dumperDestructor(Dumper* dumper) {
     IF_ARG_NULL_RETURN(dumper);
 
+    dumperAddDebugInfoToAllLogsFile(dumper, "</body>\n");
+
     FREE(fileNameBuffer);
     FREE(tmpBuffer);
     FREE(buffer);
     FREE(fileFullNameBuffer);
+    FREE(dumper->allLogsFile);
     *dumper = {};
 
     return DUMPER_STATUS_OK;
